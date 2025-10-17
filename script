@@ -1,0 +1,1790 @@
+-- Open/Close with Q
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local Workspace = game:GetService("Workspace")
+
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+
+-- Create GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "UniMenu_" .. HttpService:GenerateGUID(false)
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Main Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 400, 0, 750)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -375)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+mainFrame.BackgroundTransparency = 0.1
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+mainFrame.Parent = gui
+
+-- Glass effect
+local gradient = Instance.new("UIGradient")
+gradient.Rotation = 90
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 200, 255))
+})
+gradient.Parent = mainFrame
+
+-- Title Bar
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 40)
+titleBar.Position = UDim2.new(0, 0, 0, 0)
+titleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+
+local title = Instance.new("TextLabel")
+title.Text = "UNI MENU (Q to open/close)"
+title.Size = UDim2.new(1, 0, 1, 0)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(220, 220, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.Parent = titleBar
+
+-- Tabs
+local tabs = Instance.new("Frame")
+tabs.Size = UDim2.new(1, 0, 0, 35)
+tabs.Position = UDim2.new(0, 0, 0, 40)
+tabs.BackgroundTransparency = 1
+tabs.Parent = mainFrame
+
+local mainBtn = Instance.new("TextButton")
+mainBtn.Text = "MAIN"
+mainBtn.Size = UDim2.new(0.33, 0, 1, 0)
+mainBtn.Position = UDim2.new(0, 0, 0, 0)
+mainBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+mainBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
+mainBtn.Font = Enum.Font.Gotham
+mainBtn.TextSize = 14
+mainBtn.Parent = tabs
+
+local scriptsBtn = Instance.new("TextButton")
+scriptsBtn.Text = "OPEN SOURCE SCRIPTS"
+scriptsBtn.Size = UDim2.new(0.34, 0, 1, 0)
+scriptsBtn.Position = UDim2.new(0.33, 0, 0, 0)
+scriptsBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+scriptsBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
+scriptsBtn.Font = Enum.Font.Gotham
+scriptsBtn.TextSize = 12
+scriptsBtn.Parent = tabs
+
+local creditsBtn = Instance.new("TextButton")
+creditsBtn.Text = "CREDITS"
+creditsBtn.Size = UDim2.new(0.33, 0, 1, 0)
+creditsBtn.Position = UDim2.new(0.67, 0, 0, 0)
+creditsBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+creditsBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
+creditsBtn.Font = Enum.Font.Gotham
+creditsBtn.TextSize = 14
+creditsBtn.Parent = tabs
+
+-- Content Area
+local content = Instance.new("Frame")
+content.Size = UDim2.new(1, 0, 1, -75)
+content.Position = UDim2.new(0, 0, 0, 75)
+content.BackgroundTransparency = 1
+content.Parent = mainFrame
+
+-- Main Content
+local mainContent = Instance.new("ScrollingFrame")
+mainContent.Size = UDim2.new(1, 0, 1, 0)
+mainContent.BackgroundTransparency = 1
+mainContent.ScrollBarThickness = 3
+mainContent.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 150)
+mainContent.Visible = true
+mainContent.Parent = content
+
+local mainLayout = Instance.new("UIListLayout")
+mainLayout.Padding = UDim.new(0, 15)
+mainLayout.Parent = mainContent
+
+-- Open Source Scripts Content
+local scriptsContent = Instance.new("ScrollingFrame")
+scriptsContent.Size = UDim2.new(1, 0, 1, 0)
+scriptsContent.BackgroundTransparency = 1
+scriptsContent.ScrollBarThickness = 3
+scriptsContent.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 150)
+scriptsContent.Visible = false
+scriptsContent.Parent = content
+
+local scriptsLayout = Instance.new("UIListLayout")
+scriptsLayout.Padding = UDim.new(0, 15)
+scriptsLayout.Parent = scriptsContent
+
+-- Credits Content
+local creditsContent = Instance.new("Frame")
+creditsContent.Size = UDim2.new(1, 0, 1, 0)
+creditsContent.BackgroundTransparency = 1
+creditsContent.Visible = false
+creditsContent.Parent = content
+
+local creditsText = Instance.new("TextLabel")
+creditsText.Text = "MADE BY @selfdamagedev\n(IN TELEGRAM)"
+creditsText.Size = UDim2.new(1, 0, 1, 0)
+creditsText.BackgroundTransparency = 1
+creditsText.TextColor3 = Color3.fromRGB(220, 220, 255)
+creditsText.Font = Enum.Font.GothamBold
+creditsText.TextSize = 18
+creditsText.TextYAlignment = Enum.TextYAlignment.Center
+creditsText.Parent = creditsContent
+
+-- Fling Player Selection Menu
+local flingMenu = Instance.new("Frame")
+flingMenu.Size = UDim2.new(0, 350, 0, 450)
+flingMenu.Position = UDim2.new(0.5, -175, 0.5, -225)
+flingMenu.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+flingMenu.BorderSizePixel = 0
+flingMenu.Visible = false
+flingMenu.ZIndex = 10
+flingMenu.Parent = gui
+
+local flingMenuTitle = Instance.new("TextLabel")
+flingMenuTitle.Text = "SELECT PLAYER TO FLING"
+flingMenuTitle.Size = UDim2.new(1, 0, 0, 40)
+flingMenuTitle.Position = UDim2.new(0, 0, 0, 0)
+flingMenuTitle.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+flingMenuTitle.TextColor3 = Color3.fromRGB(220, 220, 255)
+flingMenuTitle.Font = Enum.Font.GothamBold
+flingMenuTitle.TextSize = 16
+flingMenuTitle.Parent = flingMenu
+
+local playersList = Instance.new("ScrollingFrame")
+playersList.Size = UDim2.new(0.9, 0, 0, 300)
+playersList.Position = UDim2.new(0.05, 0, 0, 50)
+playersList.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+playersList.ScrollBarThickness = 5
+playersList.Parent = flingMenu
+
+local playersLayout = Instance.new("UIListLayout")
+playersLayout.Padding = UDim.new(0, 5)
+playersLayout.Parent = playersList
+
+local flingConfirmBtn = Instance.new("TextButton")
+flingConfirmBtn.Text = "START FLINGING SELECTED PLAYER"
+flingConfirmBtn.Size = UDim2.new(0.9, 0, 0, 40)
+flingConfirmBtn.Position = UDim2.new(0.05, 0, 0, 360)
+flingConfirmBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+flingConfirmBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
+flingConfirmBtn.Font = Enum.Font.Gotham
+flingConfirmBtn.TextSize = 14
+flingConfirmBtn.Parent = flingMenu
+
+local flingCloseBtn = Instance.new("TextButton")
+flingCloseBtn.Text = "CLOSE"
+flingCloseBtn.Size = UDim2.new(0.9, 0, 0, 40)
+flingCloseBtn.Position = UDim2.new(0.05, 0, 0, 405)
+flingCloseBtn.BackgroundColor3 = Color3.fromRGB(120, 80, 80)
+flingCloseBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
+flingCloseBtn.Font = Enum.Font.Gotham
+flingCloseBtn.TextSize = 14
+flingCloseBtn.Parent = flingMenu
+
+-- Aimbot Menu
+local aimbotMenu = Instance.new("Frame")
+aimbotMenu.Size = UDim2.new(0, 350, 0, 300)
+aimbotMenu.Position = UDim2.new(0.5, -175, 0.5, -150)
+aimbotMenu.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+aimbotMenu.BorderSizePixel = 0
+aimbotMenu.Visible = false
+aimbotMenu.ZIndex = 10
+aimbotMenu.Parent = gui
+
+local aimbotMenuTitle = Instance.new("TextLabel")
+aimbotMenuTitle.Text = "AIMBOT SETTINGS"
+aimbotMenuTitle.Size = UDim2.new(1, 0, 0, 40)
+aimbotMenuTitle.Position = UDim2.new(0, 0, 0, 0)
+aimbotMenuTitle.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+aimbotMenuTitle.TextColor3 = Color3.fromRGB(220, 220, 255)
+aimbotMenuTitle.Font = Enum.Font.GothamBold
+aimbotMenuTitle.TextSize = 16
+aimbotMenuTitle.Parent = aimbotMenu
+
+local aimbotTargetList = Instance.new("ScrollingFrame")
+aimbotTargetList.Size = UDim2.new(0.9, 0, 0, 150)
+aimbotTargetList.Position = UDim2.new(0.05, 0, 0, 50)
+aimbotTargetList.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+aimbotTargetList.ScrollBarThickness = 5
+aimbotTargetList.Parent = aimbotMenu
+
+local aimbotTargetLayout = Instance.new("UIListLayout")
+aimbotTargetLayout.Padding = UDim.new(0, 5)
+aimbotTargetLayout.Parent = aimbotTargetList
+
+local aimbotConfirmBtn = Instance.new("TextButton")
+aimbotConfirmBtn.Text = "START AIMBOT ON SELECTED PLAYER"
+aimbotConfirmBtn.Size = UDim2.new(0.9, 0, 0, 40)
+aimbotConfirmBtn.Position = UDim2.new(0.05, 0, 0, 210)
+aimbotConfirmBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+aimbotConfirmBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
+aimbotConfirmBtn.Font = Enum.Font.Gotham
+aimbotConfirmBtn.TextSize = 14
+aimbotConfirmBtn.Parent = aimbotMenu
+
+local aimbotCloseBtn = Instance.new("TextButton")
+aimbotCloseBtn.Text = "CLOSE"
+aimbotCloseBtn.Size = UDim2.new(0.9, 0, 0, 40)
+aimbotCloseBtn.Position = UDim2.new(0.05, 0, 0, 255)
+aimbotCloseBtn.BackgroundColor3 = Color3.fromRGB(120, 80, 80)
+aimbotCloseBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
+aimbotCloseBtn.Font = Enum.Font.Gotham
+aimbotCloseBtn.TextSize = 14
+aimbotCloseBtn.Parent = aimbotMenu
+
+-- Button creation function
+local function createFeatureButton(text, parent)
+    local button = Instance.new("TextButton")
+    button.Text = text
+    button.Size = UDim2.new(0.9, 0, 0, 45)
+    button.Position = UDim2.new(0.05, 0, 0, 0)
+    button.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    button.TextColor3 = Color3.fromRGB(220, 220, 255)
+    button.Font = Enum.Font.Gotham
+    button.TextSize = 14
+    button.AutoButtonColor = false
+    button.Parent = parent
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = button
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(80, 80, 120)
+    stroke.Thickness = 2
+    stroke.Parent = button
+    
+    -- Hover effects
+    button.MouseEnter:Connect(function()
+        if button.BackgroundColor3 ~= Color3.fromRGB(80, 120, 80) then
+            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 90)}):Play()
+        end
+    end)
+    
+    button.MouseLeave:Connect(function()
+        if button.BackgroundColor3 ~= Color3.fromRGB(80, 120, 80) then
+            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 65)}):Play()
+        end
+    end)
+    
+    return button
+end
+
+-- Script button creation function
+local function createScriptButton(text, parent)
+    local button = Instance.new("TextButton")
+    button.Text = text
+    button.Size = UDim2.new(0.9, 0, 0, 50)
+    button.Position = UDim2.new(0.05, 0, 0, 0)
+    button.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
+    button.TextColor3 = Color3.fromRGB(220, 220, 255)
+    button.Font = Enum.Font.Gotham
+    button.TextSize = 12
+    button.TextWrapped = true
+    button.AutoButtonColor = false
+    button.Parent = parent
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = button
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(100, 100, 150)
+    stroke.Thickness = 2
+    stroke.Parent = button
+    
+    -- Hover effects
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(70, 70, 110)}):Play()
+    end)
+    
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 80)}):Play()
+    end)
+    
+    return button
+end
+
+-- Slider creation function
+local function createSlider(parent, name, minValue, maxValue, defaultValue)
+    local sliderContainer = Instance.new("Frame")
+    sliderContainer.Size = UDim2.new(0.9, 0, 0, 60)
+    sliderContainer.BackgroundTransparency = 1
+    sliderContainer.Parent = parent
+    
+    local label = Instance.new("TextLabel")
+    label.Text = name .. ": " .. defaultValue
+    label.Size = UDim2.new(1, 0, 0, 20)
+    label.Position = UDim2.new(0, 0, 0, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(220, 220, 255)
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 12
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = sliderContainer
+    
+    local track = Instance.new("Frame")
+    track.Size = UDim2.new(1, 0, 0, 6)
+    track.Position = UDim2.new(0, 0, 0, 25)
+    track.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+    track.BorderSizePixel = 0
+    track.Parent = sliderContainer
+    
+    local trackCorner = Instance.new("UICorner")
+    trackCorner.CornerRadius = UDim.new(1, 0)
+    trackCorner.Parent = track
+    
+    local fill = Instance.new("Frame")
+    fill.Size = UDim2.new((defaultValue - minValue) / (maxValue - minValue), 0, 1, 0)
+    fill.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
+    fill.BorderSizePixel = 0
+    fill.Parent = track
+    
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(1, 0)
+    fillCorner.Parent = fill
+    
+    local thumb = Instance.new("Frame")
+    thumb.Size = UDim2.new(0, 16, 0, 16)
+    thumb.Position = UDim2.new((defaultValue - minValue) / (maxValue - minValue), -8, 0.5, -8)
+    thumb.BackgroundColor3 = Color3.fromRGB(220, 220, 255)
+    thumb.BorderSizePixel = 0
+    thumb.Parent = track
+    
+    local thumbCorner = Instance.new("UICorner")
+    thumbCorner.CornerRadius = UDim.new(1, 0)
+    thumbCorner.Parent = thumb
+    
+    local thumbStroke = Instance.new("UIStroke")
+    thumbStroke.Color = Color3.fromRGB(100, 150, 255)
+    thumbStroke.Thickness = 2
+    thumbStroke.Parent = thumb
+    
+    local value = defaultValue
+    local dragging = false
+    
+    local function updateValue(newValue)
+        newValue = math.clamp(newValue, minValue, maxValue)
+        value = newValue
+        label.Text = name .. ": " .. string.format("%.1f", newValue)
+        
+        local ratio = (newValue - minValue) / (maxValue - minValue)
+        fill.Size = UDim2.new(ratio, 0, 1, 0)
+        thumb.Position = UDim2.new(ratio, -8, 0.5, -8)
+        
+        return newValue
+    end
+    
+    local function updateFromMouse()
+        local mousePos = game:GetService("Players").LocalPlayer:GetMouse()
+        local relativeX = (mousePos.X - track.AbsolutePosition.X) / track.AbsoluteSize.X
+        relativeX = math.clamp(relativeX, 0, 1)
+        local newValue = minValue + (relativeX * (maxValue - minValue))
+        return updateValue(newValue)
+    end
+    
+    track.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            updateFromMouse()
+        end
+    end)
+    
+    track.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    UIS.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            updateFromMouse()
+        end
+    end)
+    
+    return {
+        Container = sliderContainer,
+        GetValue = function() return value end,
+        SetValue = updateValue
+    }
+end
+
+-- Create feature buttons
+local flyBtn = createFeatureButton("FLY", mainContent)
+local infinityFlyBtn = createFeatureButton("INFINITY FLY", mainContent)
+local vehicleFlyBtn = createFeatureButton("VEHICLE FLY", mainContent)
+local flingBtn = createFeatureButton("FLING", mainContent)
+local hitboxBtn = createFeatureButton("HITBOX", mainContent)
+local antikickBtn = createFeatureButton("ANTIKICK", mainContent)
+local antiflingBtn = createFeatureButton("ANTIFLING", mainContent)
+local noclipBtn = createFeatureButton("NOCLIP", mainContent)
+local killAuraBtn = createFeatureButton("KILL AURA", mainContent)
+local godModeBtn = createFeatureButton("GOD MODE", mainContent)
+local aimbotBtn = createFeatureButton("AIMBOT", mainContent)
+
+-- Create sliders
+local speedSlider = createSlider(mainContent, "SPEED", 0, 300, 16)
+local jumpSlider = createSlider(mainContent, "JUMP", 0, 300, 7.2)
+local gravitySlider = createSlider(mainContent, "GRAVITY", 0, 300, 196.2)
+local flySpeedSlider = createSlider(mainContent, "FLY SPEED", 10, 200, 50)
+local killAuraRadiusSlider = createSlider(mainContent, "KILL AURA RADIUS", 5, 50, 15)
+local aimbotSmoothnessSlider = createSlider(mainContent, "AIMBOT SMOOTHNESS", 1, 20, 5)
+
+-- Create Prison Life script buttons
+local prisonWareBtn = createScriptButton("PRISON WARE", scriptsContent)
+local nihilizeBtn = createScriptButton("NIHILIZE H4X - TELEPORTS", scriptsContent)
+local lightuxBtn = createScriptButton("LIGHTUX HUB", scriptsContent)
+local bowserBtn = createScriptButton("BOWSER HUB", scriptsContent)
+local tigerBtn = createScriptButton("TIGER ADMIN COMMAND CONSOLE", scriptsContent)
+local psAdminBtn = createScriptButton("PS ADMIN", scriptsContent)
+local voidBtn = createScriptButton("VOID HUB", scriptsContent)
+
+-- Variables for features
+local flying = false
+local infinityFlying = false
+local vehicleFlying = false
+local noclip = false
+local flinging = false
+local hitboxEnabled = false
+local antiflingEnabled = false
+local killAuraEnabled = false
+local godModeEnabled = false
+local aimbotEnabled = false
+local flyConnection = nil
+local infinityFlyConnection = nil
+local vehicleFlyConnection = nil
+local flingConnection = nil
+local killAuraConnection = nil
+local godModeConnection = nil
+local aimbotConnection = nil
+local hitboxHighlights = {}
+local hitboxConnections = {}
+local selectedPlayerForFling = nil
+local selectedPlayerForAimbot = nil
+
+-- Advanced God Mode variables
+local originalHumanoidProperties = {}
+local godModeParts = {}
+local godModeConnections = {}
+
+-- Fling variables
+local flingTarget = nil
+local flingLoop = nil
+
+-- Aimbot variables
+local aimbotTarget = nil
+local aimbotLoop = nil
+
+-- Dragging functionality for menus
+local function makeDraggable(frame, dragHandle)
+    local dragging = false
+    local dragInput, dragStart, startPos
+    
+    local function update(input)
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+    
+    dragHandle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    dragHandle.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+    
+    UIS.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+end
+
+-- Apply dragging to all menus
+makeDraggable(mainFrame, titleBar)
+makeDraggable(flingMenu, flingMenuTitle)
+makeDraggable(aimbotMenu, aimbotMenuTitle)
+
+-- Reset all settings function
+local function resetAllSettings()
+    -- Reset button states
+    flying = false
+    infinityFlying = false
+    vehicleFlying = false
+    noclip = false
+    flinging = false
+    hitboxEnabled = false
+    antiflingEnabled = false
+    killAuraEnabled = false
+    godModeEnabled = false
+    aimbotEnabled = false
+    
+    -- Reset button colors
+    flyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    infinityFlyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    vehicleFlyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    flingBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    hitboxBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    antikickBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    antiflingBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    noclipBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    killAuraBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    godModeBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    aimbotBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    
+    -- Reset sliders to default values
+    speedSlider.SetValue(16)
+    jumpSlider.SetValue(7.2)
+    gravitySlider.SetValue(196.2)
+    flySpeedSlider.SetValue(50)
+    killAuraRadiusSlider.SetValue(15)
+    aimbotSmoothnessSlider.SetValue(5)
+    
+    -- Disconnect all connections
+    if flyConnection then
+        flyConnection:Disconnect()
+        flyConnection = nil
+    end
+    
+    if infinityFlyConnection then
+        infinityFlyConnection:Disconnect()
+        infinityFlyConnection = nil
+    end
+    
+    if vehicleFlyConnection then
+        vehicleFlyConnection:Disconnect()
+        vehicleFlyConnection = nil
+    end
+    
+    if flingConnection then
+        flingConnection:Disconnect()
+        flingConnection = nil
+    end
+    
+    if killAuraConnection then
+        killAuraConnection:Disconnect()
+        killAuraConnection = nil
+    end
+    
+    if godModeConnection then
+        godModeConnection:Disconnect()
+        godModeConnection = nil
+    end
+    
+    if aimbotConnection then
+        aimbotConnection:Disconnect()
+        aimbotConnection = nil
+    end
+    
+    -- Stop fling loop
+    if flingLoop then
+        flingLoop:Disconnect()
+        flingLoop = nil
+    end
+    
+    -- Stop aimbot loop
+    if aimbotLoop then
+        aimbotLoop:Disconnect()
+        aimbotLoop = nil
+    end
+    
+    -- Remove all effects from character
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        
+        if humanoid then
+            humanoid.WalkSpeed = 16
+            humanoid.JumpPower = 7.2
+        end
+        
+        if rootPart then
+            -- Remove all body movers
+            for _, child in ipairs(rootPart:GetChildren()) do
+                if child:IsA("BodyVelocity") or child:IsA("BodyAngularVelocity") or child:IsA("BodyForce") or child:IsA("BodyPosition") then
+                    child:Destroy()
+                end
+            end
+        end
+        
+        -- Restore collision
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+        
+        -- Remove god mode effects
+        removeGodMode()
+    end
+    
+    -- Restore workspace gravity
+    workspace.Gravity = 196.2
+    
+    print("All settings reset due to player death")
+end
+
+-- Apply slider values function
+local function applySliderValues()
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = speedSlider.GetValue()
+            humanoid.JumpPower = jumpSlider.GetValue()
+        end
+    end
+    workspace.Gravity = gravitySlider.GetValue()
+end
+
+-- Auto-apply slider values when they change
+spawn(function()
+    while true do
+        applySliderValues()
+        wait(0.1)
+    end
+end)
+
+-- Also apply when character respawns
+player.CharacterAdded:Connect(function(character)
+    wait(1)
+    applySliderValues()
+    
+    -- Reapply features if they were enabled
+    if godModeEnabled then
+        applyGodMode()
+    end
+    
+    if hitboxEnabled then
+        -- Reapply hitboxes after respawn
+        spawn(function()
+            wait(1)
+            if hitboxEnabled then
+                applyHitboxes()
+            end
+        end)
+    end
+    
+    -- Set up death detection for new character
+    local humanoid = character:WaitForChild("Humanoid")
+    humanoid.Died:Connect(resetAllSettings)
+end)
+
+-- Set up death detection for initial character
+if player.Character then
+    local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.Died:Connect(resetAllSettings)
+    end
+end
+
+-- IMPROVED HITBOX SYSTEM (Persistent through respawns)
+local function applyHitboxes()
+    -- Clear existing highlights
+    for _, highlight in pairs(hitboxHighlights) do
+        if highlight then
+            highlight:Destroy()
+        end
+    end
+    hitboxHighlights = {}
+    
+    -- Clear existing connections
+    for _, connection in pairs(hitboxConnections) do
+        if connection then
+            connection:Disconnect()
+        end
+    end
+    hitboxConnections = {}
+    
+    -- Function to highlight a model
+    local function highlightModel(model, isPlayer)
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "UniMenuHitbox"
+        if isPlayer then
+            highlight.FillColor = Color3.fromRGB(255, 0, 0)
+            highlight.OutlineColor = Color3.fromRGB(255, 255, 0)
+        else
+            highlight.FillColor = Color3.fromRGB(0, 0, 255)
+            highlight.OutlineColor = Color3.fromRGB(0, 255, 255)
+        end
+        highlight.FillTransparency = 0.3
+        highlight.OutlineTransparency = 0
+        highlight.Parent = model
+        hitboxHighlights[model] = highlight
+    end
+    
+    -- Highlight all players
+    for _, otherPlayer in ipairs(Players:GetPlayers()) do
+        if otherPlayer ~= player then
+            if otherPlayer.Character then
+                highlightModel(otherPlayer.Character, true)
+            end
+            -- Connect to character added for this player
+            local connection = otherPlayer.CharacterAdded:Connect(function(character)
+                if hitboxEnabled then
+                    wait(1)
+                    highlightModel(character, true)
+                end
+            end)
+            table.insert(hitboxConnections, connection)
+        end
+    end
+    
+    -- Highlight NPCs
+    for _, obj in ipairs(workspace:GetChildren()) do
+        if obj:IsA("Model") and obj ~= player.Character then
+            local humanoid = obj:FindFirstChildOfClass("Humanoid")
+            if humanoid and not Players:GetPlayerFromCharacter(obj) then
+                highlightModel(obj, false)
+            end
+        end
+    end
+    
+    -- Connect to new players
+    local playerAddedConnection = Players.PlayerAdded:Connect(function(newPlayer)
+        newPlayer.CharacterAdded:Connect(function(character)
+            if hitboxEnabled then
+                wait(1)
+                highlightModel(character, true)
+            end
+        end)
+    end)
+    table.insert(hitboxConnections, playerAddedConnection)
+end
+
+-- HITBOX Function
+hitboxBtn.MouseButton1Click:Connect(function()
+    hitboxEnabled = not hitboxEnabled
+    
+    if hitboxEnabled then
+        hitboxBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+        applyHitboxes()
+    else
+        hitboxBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+        
+        -- Remove all highlights
+        for _, highlight in pairs(hitboxHighlights) do
+            if highlight then
+                highlight:Destroy()
+            end
+        end
+        hitboxHighlights = {}
+        
+        -- Disconnect all connections
+        for _, connection in pairs(hitboxConnections) do
+            if connection then
+                connection:Disconnect()
+            end
+        end
+        hitboxConnections = {}
+    end
+end)
+
+-- FLY Function (без PlatformStand)
+flyBtn.MouseButton1Click:Connect(function()
+    flying = not flying
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        
+        if flying then
+            flyBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+            
+            if flyConnection then
+                flyConnection:Disconnect()
+            end
+            
+            -- Create fly velocity
+            local bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.Name = "FlyVelocity"
+            bodyVelocity.MaxForce = Vector3.new(40000, 40000, 40000)
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyVelocity.Parent = rootPart
+            
+            -- Create body gyro for full rotation
+            local bodyGyro = Instance.new("BodyGyro")
+            bodyGyro.Name = "FlyGyro"
+            bodyGyro.MaxTorque = Vector3.new(40000, 40000, 40000)
+            bodyGyro.P = 1000
+            bodyGyro.D = 500
+            bodyGyro.Parent = rootPart
+            
+            -- Fly controls with full camera rotation
+            flyConnection = RunService.Heartbeat:Connect(function()
+                if not flying or not rootPart or not rootPart:FindFirstChild("FlyVelocity") then
+                    return
+                end
+                
+                local camera = workspace.CurrentCamera
+                local flySpeed = flySpeedSlider.GetValue()
+                local velocity = Vector3.new(0, 0, 0)
+                
+                -- Update body rotation to match camera (full rotation)
+                if rootPart:FindFirstChild("FlyGyro") then
+                    bodyGyro.CFrame = camera.CFrame
+                end
+                
+                -- Get camera-relative vectors
+                local lookVector = camera.CFrame.LookVector
+                local rightVector = camera.CFrame.RightVector
+                local upVector = camera.CFrame.UpVector
+                
+                -- Movement relative to camera (full 3D)
+                if UIS:IsKeyDown(Enum.KeyCode.W) then
+                    velocity = velocity + (lookVector * flySpeed)
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.S) then
+                    velocity = velocity + (lookVector * -flySpeed)
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.A) then
+                    velocity = velocity + (rightVector * -flySpeed)
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.D) then
+                    velocity = velocity + (rightVector * flySpeed)
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.Space) then
+                    velocity = velocity + (upVector * flySpeed)
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
+                    velocity = velocity + (upVector * -flySpeed)
+                end
+                
+                rootPart:FindFirstChild("FlyVelocity").Velocity = velocity
+            end)
+        else
+            flyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+            if flyConnection then
+                flyConnection:Disconnect()
+            end
+            if rootPart then
+                local bodyVelocity = rootPart:FindFirstChild("FlyVelocity")
+                if bodyVelocity then
+                    bodyVelocity:Destroy()
+                end
+                local bodyGyro = rootPart:FindFirstChild("FlyGyro")
+                if bodyGyro then
+                    bodyGyro:Destroy()
+                end
+            end
+        end
+    end
+end)
+
+-- INFINITY FLY Function (улучшенный флай без ограничений)
+infinityFlyBtn.MouseButton1Click:Connect(function()
+    infinityFlying = not infinityFlying
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        
+        if infinityFlying then
+            infinityFlyBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+            
+            if infinityFlyConnection then
+                infinityFlyConnection:Disconnect()
+            end
+            
+            -- Infinity Fly uses CFrame manipulation for unlimited flight
+            infinityFlyConnection = RunService.Heartbeat:Connect(function()
+                if not infinityFlying or not rootPart then
+                    return
+                end
+                
+                local camera = workspace.CurrentCamera
+                local flySpeed = flySpeedSlider.GetValue() * 2 -- Double speed for infinity fly
+                local moveDirection = Vector3.new(0, 0, 0)
+                
+                -- Get camera-relative vectors
+                local lookVector = camera.CFrame.LookVector
+                local rightVector = camera.CFrame.RightVector
+                local upVector = Vector3.new(0, 1, 0) -- Always use world up vector
+                
+                -- Movement relative to camera (full 3D)
+                if UIS:IsKeyDown(Enum.KeyCode.W) then
+                    moveDirection = moveDirection + lookVector
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.S) then
+                    moveDirection = moveDirection - lookVector
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.A) then
+                    moveDirection = moveDirection - rightVector
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.D) then
+                    moveDirection = moveDirection + rightVector
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.Space) then
+                    moveDirection = moveDirection + upVector
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
+                    moveDirection = moveDirection - upVector
+                end
+                
+                -- Normalize direction for consistent speed
+                if moveDirection.Magnitude > 0 then
+                    moveDirection = moveDirection.Unit
+                end
+                
+                -- Apply movement directly to CFrame for smooth infinite flight
+                rootPart.CFrame = rootPart.CFrame + (moveDirection * flySpeed * 0.1)
+                
+                -- Auto noclip during infinity fly
+                for _, part in ipairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end)
+        else
+            infinityFlyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+            if infinityFlyConnection then
+                infinityFlyConnection:Disconnect()
+                infinityFlyConnection = nil
+            end
+            
+            -- Restore collision when infinity fly is off
+            if not noclip then
+                for _, part in ipairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- VEHICLE FLY Function
+vehicleFlyBtn.MouseButton1Click:Connect(function()
+    vehicleFlying = not vehicleFlying
+    
+    if vehicleFlying then
+        vehicleFlyBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+        
+        if vehicleFlyConnection then
+            vehicleFlyConnection:Disconnect()
+        end
+        
+        vehicleFlyConnection = RunService.Heartbeat:Connect(function()
+            if not vehicleFlying then return end
+            
+            local character = player.Character
+            if not character then return end
+            
+            -- Find vehicle seat
+            local vehicleSeat = nil
+            for _, part in ipairs(character:GetChildren()) do
+                if part:IsA("VehicleSeat") then
+                    vehicleSeat = part
+                    break
+                end
+            end
+            
+            -- Also check workspace for vehicles
+            if not vehicleSeat then
+                for _, obj in ipairs(workspace:GetChildren()) do
+                    if obj:IsA("VehicleSeat") and obj.Occupant == character:FindFirstChild("Humanoid") then
+                        vehicleSeat = obj
+                        break
+                    end
+                end
+            end
+            
+            if vehicleSeat then
+                local flySpeed = flySpeedSlider.GetValue()
+                local camera = workspace.CurrentCamera
+                local velocity = Vector3.new(0, 0, 0)
+                
+                -- Get camera-relative vectors
+                local lookVector = camera.CFrame.LookVector
+                local rightVector = camera.CFrame.RightVector
+                local upVector = camera.CFrame.UpVector
+                
+                -- Movement relative to camera
+                if UIS:IsKeyDown(Enum.KeyCode.W) then
+                    velocity = velocity + (lookVector * flySpeed)
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.S) then
+                    velocity = velocity + (lookVector * -flySpeed)
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.A) then
+                    velocity = velocity + (rightVector * -flySpeed)
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.D) then
+                    velocity = velocity + (rightVector * flySpeed)
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.Space) then
+                    velocity = velocity + (upVector * flySpeed)
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
+                    velocity = velocity + (upVector * -flySpeed)
+                end
+                
+                -- Apply velocity to vehicle
+                vehicleSeat.Velocity = velocity
+                vehicleSeat.RotVelocity = Vector3.new(0, 0, 0)
+            end
+        end)
+    else
+        vehicleFlyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+        if vehicleFlyConnection then
+            vehicleFlyConnection:Disconnect()
+            vehicleFlyConnection = nil
+        end
+    end
+end)
+
+-- Fling Player Selection Menu Functions
+local function updatePlayersList()
+    -- Clear current list
+    for _, child in ipairs(playersList:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
+        end
+    end
+    
+    -- Add players to list
+    for _, otherPlayer in ipairs(Players:GetPlayers()) do
+        if otherPlayer ~= player then
+            local playerButton = Instance.new("TextButton")
+            playerButton.Text = otherPlayer.Name
+            playerButton.Size = UDim2.new(0.9, 0, 0, 30)
+            playerButton.Position = UDim2.new(0.05, 0, 0, 0)
+            playerButton.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+            playerButton.TextColor3 = Color3.fromRGB(220, 220, 255)
+            playerButton.Font = Enum.Font.Gotham
+            playerButton.TextSize = 12
+            playerButton.AutoButtonColor = false
+            playerButton.Parent = playersList
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 5)
+            corner.Parent = playerButton
+            
+            playerButton.MouseButton1Click:Connect(function()
+                selectedPlayerForFling = otherPlayer
+                -- Highlight selected player
+                for _, btn in ipairs(playersList:GetChildren()) do
+                    if btn:IsA("TextButton") then
+                        btn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+                    end
+                end
+                playerButton.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+            end)
+        end
+    end
+end
+
+-- IMPROVED FLING Function with shaking effect
+local function startFlingingTarget()
+    if not selectedPlayerForFling then return end
+    
+    flingTarget = selectedPlayerForFling
+    flinging = true
+    flingBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+    
+    local character = player.Character
+    if not character then return end
+    
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+    
+    -- Stop existing fling loop
+    if flingLoop then
+        flingLoop:Disconnect()
+    end
+    
+    -- Improved fling loop with shaking
+    flingLoop = RunService.Heartbeat:Connect(function()
+        if not flinging or not flingTarget or not flingTarget.Character then
+            return
+        end
+        
+        local targetRoot = flingTarget.Character:FindFirstChild("HumanoidRootPart")
+        if not targetRoot then return end
+        
+        -- Teleport to target with random offset for shaking effect
+        local shakeOffset = Vector3.new(
+            math.random(-2, 2),
+            math.random(1, 3),
+            math.random(-2, 2)
+        )
+        rootPart.CFrame = targetRoot.CFrame + shakeOffset
+        
+        -- Apply aggressive fling forces with shaking
+        local bodyAngular = rootPart:FindFirstChild("FlingSpin") or Instance.new("BodyAngularVelocity")
+        bodyAngular.Name = "FlingSpin"
+        bodyAngular.MaxTorque = Vector3.new(1, 1, 1) * 10000000
+        bodyAngular.AngularVelocity = Vector3.new(
+            math.random(-1000, 1000),
+            math.random(-1000, 1000),
+            math.random(-1000, 1000)
+        )
+        bodyAngular.Parent = rootPart
+        
+        local bodyVelocity = rootPart:FindFirstChild("FlingVelocity") or Instance.new("BodyVelocity")
+        bodyVelocity.Name = "FlingVelocity"
+        bodyVelocity.MaxForce = Vector3.new(40000, 40000, 40000)
+        bodyVelocity.Velocity = Vector3.new(
+            math.random(-50, 50),
+            math.random(50, 100),
+            math.random(-50, 50)
+        )
+        bodyVelocity.Parent = rootPart
+    end)
+    
+    flingMenu.Visible = false
+    print("Flinging player: " .. flingTarget.Name)
+end
+
+local function stopFlinging()
+    flinging = false
+    flingTarget = nil
+    flingBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    
+    if flingLoop then
+        flingLoop:Disconnect()
+        flingLoop = nil
+    end
+    
+    local character = player.Character
+    if character then
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            local bodyAngular = rootPart:FindFirstChild("FlingSpin")
+            if bodyAngular then
+                bodyAngular:Destroy()
+            end
+            local bodyVelocity = rootPart:FindFirstChild("FlingVelocity")
+            if bodyVelocity then
+                bodyVelocity:Destroy()
+            end
+        end
+    end
+end
+
+-- Fling button with menu
+flingBtn.MouseButton1Click:Connect(function()
+    if flinging then
+        stopFlinging()
+    else
+        updatePlayersList()
+        flingMenu.Visible = not flingMenu.Visible
+    end
+end)
+
+flingConfirmBtn.MouseButton1Click:Connect(function()
+    if selectedPlayerForFling then
+        startFlingingTarget()
+    end
+end)
+
+flingCloseBtn.MouseButton1Click:Connect(function()
+    flingMenu.Visible = false
+end)
+
+-- AIMBOT Functions
+local function updateAimbotTargets()
+    -- Clear current list
+    for _, child in ipairs(aimbotTargetList:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
+        end
+    end
+    
+    -- Add players to list
+    for _, otherPlayer in ipairs(Players:GetPlayers()) do
+        if otherPlayer ~= player then
+            local playerButton = Instance.new("TextButton")
+            playerButton.Text = otherPlayer.Name
+            playerButton.Size = UDim2.new(0.9, 0, 0, 30)
+            playerButton.Position = UDim2.new(0.05, 0, 0, 0)
+            playerButton.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+            playerButton.TextColor3 = Color3.fromRGB(220, 220, 255)
+            playerButton.Font = Enum.Font.Gotham
+            playerButton.TextSize = 12
+            playerButton.AutoButtonColor = false
+            playerButton.Parent = aimbotTargetList
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 5)
+            corner.Parent = playerButton
+            
+            playerButton.MouseButton1Click:Connect(function()
+                selectedPlayerForAimbot = otherPlayer
+                -- Highlight selected player
+                for _, btn in ipairs(aimbotTargetList:GetChildren()) do
+                    if btn:IsA("TextButton") then
+                        btn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+                    end
+                end
+                playerButton.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+            end)
+        end
+    end
+end
+
+-- ADVANCED AIMBOT Function
+local function startAimbotOnTarget()
+    if not selectedPlayerForAimbot then return end
+    
+    aimbotTarget = selectedPlayerForAimbot
+    aimbotEnabled = true
+    aimbotBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+    
+    local character = player.Character
+    if not character then return end
+    
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    
+    -- Stop existing aimbot loop
+    if aimbotLoop then
+        aimbotLoop:Disconnect()
+    end
+    
+    -- Aimbot loop
+    aimbotLoop = RunService.Heartbeat:Connect(function()
+        if not aimbotEnabled or not aimbotTarget or not aimbotTarget.Character then
+            return
+        end
+        
+        local targetCharacter = aimbotTarget.Character
+        local targetHead = targetCharacter:FindFirstChild("Head")
+        local targetHumanoid = targetCharacter:FindFirstChildOfClass("Humanoid")
+        
+        if not targetHead or not targetHumanoid or targetHumanoid.Health <= 0 then
+            return
+        end
+        
+        local localCharacter = player.Character
+        if not localCharacter then return end
+        
+        local localHead = localCharacter:FindFirstChild("Head")
+        if not localHead then return end
+        
+        -- Calculate direction to target
+        local direction = (targetHead.Position - localHead.Position).Unit
+        local smoothness = aimbotSmoothnessSlider.GetValue()
+        
+        -- Smooth aiming
+        local currentLook = workspace.CurrentCamera.CFrame.LookVector
+        local newLook = (currentLook * (smoothness - 1) + direction) / smoothness
+        
+        -- Create new CFrame for camera
+        local newCFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, workspace.CurrentCamera.CFrame.Position + newLook)
+        workspace.CurrentCamera.CFrame = newCFrame
+        
+        -- Also rotate character to face target
+        humanoid:ChangeState(Enum.HumanoidStateType.Running)
+        local rootPart = localCharacter:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            rootPart.CFrame = CFrame.new(rootPart.Position, Vector3.new(targetHead.Position.X, rootPart.Position.Y, targetHead.Position.Z))
+        end
+    end)
+    
+    aimbotMenu.Visible = false
+    print("Aimbot locked on: " .. aimbotTarget.Name)
+end
+
+local function stopAimbot()
+    aimbotEnabled = false
+    aimbotTarget = nil
+    aimbotBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    
+    if aimbotLoop then
+        aimbotLoop:Disconnect()
+        aimbotLoop = nil
+    end
+end
+
+-- Aimbot button with menu
+aimbotBtn.MouseButton1Click:Connect(function()
+    if aimbotEnabled then
+        stopAimbot()
+    else
+        updateAimbotTargets()
+        aimbotMenu.Visible = not aimbotMenu.Visible
+    end
+end)
+
+aimbotConfirmBtn.MouseButton1Click:Connect(function()
+    if selectedPlayerForAimbot then
+        startAimbotOnTarget()
+    end
+end)
+
+aimbotCloseBtn.MouseButton1Click:Connect(function()
+    aimbotMenu.Visible = false
+end)
+
+-- ADVANCED GOD MODE Function (Working bypass)
+godModeBtn.MouseButton1Click:Connect(function()
+    godModeEnabled = not godModeEnabled
+    
+    if godModeEnabled then
+        godModeBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+        applyGodMode()
+    else
+        godModeBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+        removeGodMode()
+    end
+end)
+
+-- Advanced God Mode application
+local function applyGodMode()
+    local character = player.Character
+    if not character then return end
+    
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    
+    -- Save original properties
+    originalHumanoidProperties = {
+        WalkSpeed = humanoid.WalkSpeed,
+        JumpPower = humanoid.JumpPower,
+        MaxHealth = humanoid.MaxHealth,
+        Health = humanoid.Health
+    }
+    
+    -- Method 1: Health regeneration with network bypass
+    godModeConnections.healthChanged = humanoid.HealthChanged:Connect(function()
+        pcall(function()
+            if humanoid.Health < humanoid.MaxHealth then
+                humanoid.Health = humanoid.MaxHealth
+            end
+        end)
+    end)
+    
+    -- Method 2: Max health manipulation
+    pcall(function()
+        humanoid.MaxHealth = math.huge
+        humanoid.Health = math.huge
+    end)
+    
+    -- Method 3: Force field protection
+    local forceField = Instance.new("ForceField")
+    forceField.Name = "GodModeForceField"
+    forceField.Parent = character
+    godModeParts.forceField = forceField
+    
+    -- Method 4: Collision and damage bypass
+    for _, part in ipairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            pcall(function()
+                -- Take network ownership
+                part:SetNetworkOwner(player)
+                
+                -- Disable collision and damage
+                part.CanTouch = false
+                part.CanQuery = false
+                part.Massless = true
+                
+                -- Store original properties
+                godModeParts[part] = {
+                    CanTouch = part.CanTouch,
+                    CanQuery = part.CanQuery,
+                    Massless = part.Massless
+                }
+                
+                -- Disable touch events
+                godModeConnections[part] = part.Touched:Connect(function() end)
+            end)
+        end
+    end
+    
+    -- Method 5: Anti-ragdoll protection
+    if character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart:SetNetworkOwner(player)
+    end
+    
+    print("Advanced God Mode activated")
+end
+
+-- God Mode removal
+local function removeGodMode()
+    local character = player.Character
+    if character then
+        -- Remove force field
+        local forceField = character:FindFirstChild("GodModeForceField")
+        if forceField then
+            forceField:Destroy()
+        end
+        
+        -- Restore humanoid properties
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid and originalHumanoidProperties then
+            pcall(function()
+                humanoid.WalkSpeed = originalHumanoidProperties.WalkSpeed or 16
+                humanoid.JumpPower = originalHumanoidProperties.JumpPower or 50
+                humanoid.MaxHealth = originalHumanoidProperties.MaxHealth or 100
+                humanoid.Health = originalHumanoidProperties.Health or 100
+            end)
+        end
+        
+        -- Restore part properties
+        for part, properties in pairs(godModeParts) do
+            if part and part.Parent then
+                pcall(function()
+                    part.CanTouch = properties.CanTouch
+                    part.CanQuery = properties.CanQuery
+                    part.Massless = properties.Massless
+                end)
+            end
+        end
+    end
+    
+    -- Disconnect all connections
+    for _, connection in pairs(godModeConnections) do
+        if connection then
+            connection:Disconnect()
+        end
+    end
+    
+    -- Clear tables
+    godModeParts = {}
+    godModeConnections = {}
+    originalHumanoidProperties = {}
+    
+    print("God Mode deactivated")
+end
+
+-- ADVANCED KILL AURA Function (Multiple bypass methods)
+killAuraBtn.MouseButton1Click:Connect(function()
+    killAuraEnabled = not killAuraEnabled
+    
+    if killAuraEnabled then
+        killAuraBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+        
+        -- Kill Aura connection with multiple methods
+        killAuraConnection = RunService.Heartbeat:Connect(function()
+            if not killAuraEnabled or not player.Character then
+                return
+            end
+            
+            local character = player.Character
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            
+            if not rootPart then
+                return
+            end
+            
+            local radius = killAuraRadiusSlider.GetValue()
+            
+            -- Method 1: Network Ownership Takeover + Health Manipulation
+            for _, otherPlayer in ipairs(Players:GetPlayers()) do
+                if otherPlayer ~= player and otherPlayer.Character then
+                    local otherRoot = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    local otherHumanoid = otherPlayer.Character:FindFirstChildOfClass("Humanoid")
+                    
+                    if otherRoot and otherHumanoid and otherHumanoid.Health > 0 then
+                        local distance = (otherRoot.Position - rootPart.Position).Magnitude
+                        
+                        if distance <= radius then
+                            spawn(function()
+                                -- Take network ownership
+                                pcall(function()
+                                    otherRoot:SetNetworkOwner(player)
+                                end)
+                                
+                                -- Advanced health manipulation
+                                pcall(function()
+                                    -- Method A: Direct health set with bypass
+                                    otherHumanoid.Health = 0
+                                    
+                                    -- Method B: Damage over time
+                                    for i = 1, 10 do
+                                        pcall(function()
+                                            otherHumanoid:TakeDamage(10)
+                                        end)
+                                        wait(0.01)
+                                    end
+                                    
+                                    -- Method C: Break all joints
+                                    for _, part in ipairs(otherPlayer.Character:GetChildren()) do
+                                        if part:IsA("BasePart") then
+                                            pcall(function()
+                                                part:SetNetworkOwner(player)
+                                                for _, connection in ipairs(part:GetChildren()) do
+                                                    if connection:IsA("Weld") or connection:IsA("WeldConstraint") or connection:IsA("Motor6D") then
+                                                        connection:Destroy()
+                                                    end
+                                                end
+                                            end)
+                                        end
+                                    end
+                                end)
+                            end)
+                        end
+                    end
+                end
+            end
+            
+            -- Kill NPCs with same methods
+            for _, obj in ipairs(workspace:GetChildren()) do
+                if obj:IsA("Model") and obj ~= player.Character then
+                    local humanoid = obj:FindFirstChildOfClass("Humanoid")
+                    local root = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Head") or obj:FindFirstChild("Torso")
+                    
+                    if humanoid and humanoid.Health > 0 and root then
+                        local distance = (root.Position - rootPart.Position).Magnitude
+                        
+                        if distance <= radius then
+                            spawn(function()
+                                pcall(function()
+                                    root:SetNetworkOwner(player)
+                                    humanoid.Health = 0
+                                    
+                                    for _, part in ipairs(obj:GetChildren()) do
+                                        if part:IsA("BasePart") then
+                                            part:SetNetworkOwner(player)
+                                            for _, connection in ipairs(part:GetChildren()) do
+                                                if connection:IsA("Weld") or connection:IsA("WeldConstraint") or connection:IsA("Motor6D") then
+                                                    connection:Destroy()
+                                                end
+                                            end
+                                        end
+                                    end
+                                end)
+                            end)
+                        end
+                    end
+                end
+            end
+        end)
+        
+    else
+        killAuraBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+        
+        -- Remove kill aura connection
+        if killAuraConnection then
+            killAuraConnection:Disconnect()
+        end
+    end
+end)
+
+-- ANTIKICK Function
+antikickBtn.MouseButton1Click:Connect(function()
+    if antikickBtn.BackgroundColor3 == Color3.fromRGB(45, 45, 65) then
+        antikickBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+    else
+        antikickBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    end
+end)
+
+-- ANTIFLING Function
+antiflingBtn.MouseButton1Click:Connect(function()
+    antiflingEnabled = not antiflingEnabled
+    local character = player.Character
+    if character then
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            if antiflingEnabled then
+                antiflingBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+                
+                -- Create velocity dampener
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.Name = "AntiflingDampener"
+                bodyVelocity.MaxForce = Vector3.new(5000, 5000, 5000)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.Parent = rootPart
+                
+                -- Dampen excessive velocities
+                local antiflingConnection
+                antiflingConnection = RunService.Heartbeat:Connect(function()
+                    if not antiflingEnabled or not rootPart then
+                        antiflingConnection:Disconnect()
+                        return
+                    end
+                    
+                    local currentVelocity = rootPart.Velocity
+                    local speed = currentVelocity.Magnitude
+                    
+                    if speed > 80 then
+                        local dampening = math.min(0.9, (speed - 80) / 100)
+                        local dampenedVelocity = currentVelocity * (1 - dampening)
+                        bodyVelocity.Velocity = -dampenedVelocity
+                    else
+                        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                    end
+                end)
+                
+            else
+                antiflingBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+                if rootPart then
+                    local bodyVelocity = rootPart:FindFirstChild("AntiflingDampener")
+                    if bodyVelocity then
+                        bodyVelocity:Destroy()
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- NOCLIP Function
+noclipBtn.MouseButton1Click:Connect(function()
+    noclip = not noclip
+    if noclip then
+        noclipBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
+    else
+        noclipBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    end
+end)
+
+-- Noclip loop to maintain noclip state
+RunService.Stepped:Connect(function()
+    if noclip and player.Character then
+        for _, part in ipairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+-- Prison Life Script Buttons
+prisonWareBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Denverrz/scripts/master/PRISONWARE_v1.3.txt"))()
+end)
+
+nihilizeBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet('https://pastebin.com/raw/QLtH2v8i'))()
+end)
+
+lightuxBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet(('https://raw.githubusercontent.com/rajrsansraowar/Lightux/main/README.md'),true))()
+end)
+
+bowserBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/chriszrk/Bowser-Hub/main/BowserHubCool", true))()
+end)
+
+tigerBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/APIApple/Main/refs/heads/main/loadstring"))()
+end)
+
+psAdminBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/VYjdEsc5"))()
+end)
+
+voidBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/xwH4sux8"))()
+end)
+
+-- Tab switching
+mainBtn.MouseButton1Click:Connect(function()
+    mainContent.Visible = true
+    scriptsContent.Visible = false
+    creditsContent.Visible = false
+    mainBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+    scriptsBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+    creditsBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+end)
+
+scriptsBtn.MouseButton1Click:Connect(function()
+    mainContent.Visible = false
+    scriptsContent.Visible = true
+    creditsContent.Visible = false
+    scriptsBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+    mainBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+    creditsBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+end)
+
+creditsBtn.MouseButton1Click:Connect(function()
+    mainContent.Visible = false
+    scriptsContent.Visible = false
+    creditsContent.Visible = true
+    creditsBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+    mainBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+    scriptsBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+end)
+
+-- Initial tab state
+mainBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+
+-- Open/Close with Q (изменено с RightShift на Q)
+local isOpen = true
+
+local function animateIn()
+    mainFrame.Size = UDim2.new(0, 0, 0, 0)
+    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.Visible = true
+    
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(mainFrame, tweenInfo, {
+        Size = UDim2.new(0, 400, 0, 750),
+        Position = UDim2.new(0.5, -200, 0.5, -375)
+    })
+    tween:Play()
+end
+
+local function animateOut()
+    local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+    local tween = TweenService:Create(mainFrame, tweenInfo, {
+        Size = UDim2.new(0, 0, 0, 0),
+        Position = UDim2.new(0.5, 0, 0.5, 0)
+    })
+    tween:Play()
+    tween.Completed:Wait()
+    mainFrame.Visible = false
+end
+
+UIS.InputBegan:Connect(function(input)
+    -- Изменено с RightShift на Q
+    if input.KeyCode == Enum.KeyCode.Q then
+        isOpen = not isOpen
+        if isOpen then
+            animateIn()
+        else
+            animateOut()
+        end
+    end
+end)
+
+-- Initial animation
+animateIn()
+
+-- Apply initial slider values
+applySliderValues()
+
+-- Force jump to work even with zero gravity
+local jumpConnection
+jumpConnection = RunService.Heartbeat:Connect(function()
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid and workspace.Gravity == 0 then
+            if UIS:IsKeyDown(Enum.KeyCode.Space) and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
+    end
+end)
+
+print("UNI MENU loaded! Press Q to open/close")
+print("Added: Persistent Hitboxes, Improved Fling with Shaking, Vehicle Fly, Draggable Menus, Advanced Aimbot, Infinity Fly")
